@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>PixelPanel - Connecting Spotify</title>
+</head>
+<body style="font-family: sans-serif; text-align: center; padding-top: 3em; color: #333;">
+<p id="msg">Connecting to your PixelPanel&hellip;</p>
+<script>
+  // Spotify requires a real HTTPS redirect URI (a LAN IP over plain HTTP
+  // isn't accepted, even for a device on your own network) — this page
+  // exists purely to satisfy that, then immediately bounces the browser
+  // on to the device itself, which is the only place that actually knows
+  // what to do with the authorization code. It never sees or stores
+  // anything Spotify-account-specific beyond this one-time, single-use
+  // code, and the code is useless without the matching PKCE verifier,
+  // which lives only in the device's own memory.
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get('code');
+  const state = params.get('state'); // the device's own LAN IP, set by the device when it started this flow
+  const error = params.get('error');
+  const msg = document.getElementById('msg');
+
+  if (error) {
+    msg.textContent = 'Spotify authorization failed: ' + error;
+  } else if (!code || !state) {
+    msg.textContent = 'Missing authorization code or device address — please try connecting again from your PixelPanel.';
+  } else {
+    window.location.href = 'http://' + state + '/spotify/callback?code=' + encodeURIComponent(code);
+  }
+</script>
+</body>
+</html>
